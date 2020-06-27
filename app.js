@@ -10,7 +10,7 @@ const items = ['Eat', 'Play Piano', 'Study'];
 const workItems = [];
 
 
-app.get('/', (req, res) => {
+app.get('/', (req, res, next) => {
   const today = date.getDate();
 
   res.render('index', {
@@ -20,7 +20,7 @@ app.get('/', (req, res) => {
 });
 
 
-app.get('/work', (req, res) => {
+app.get('/work', (req, res, next) => {
   res.render('index', {
     listTitle: 'Work',
     newListItems: workItems,
@@ -28,7 +28,7 @@ app.get('/work', (req, res) => {
 });
 
 
-app.post('/', (req, res) => {
+app.post('/', (req, res, next) => {
   let item = req.body.newItem;
 
   if (req.body.buttonItem === 'Work') {
