@@ -20,11 +20,24 @@ app.get('/', (req, res) => {
 });
 
 
+app.get('/work', (req, res) => {
+  res.render('index', {
+    listTitle: 'Work',
+    newListItems: workItems,
+  });
+});
+
+
 app.post('/', (req, res) => {
   let item = req.body.newItem;
-  items.push(item);
 
-  res.redirect('/');
+  if (req.body.buttonItem === 'Work') {
+    workItems.push(item);
+    res.redirect('/work');
+  } else {
+    items.push(item);
+    res.redirect('/');
+  }
 });
 
 app.listen(3000, () => console.log('Server is running on port 3000.'));
