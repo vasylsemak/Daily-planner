@@ -1,20 +1,49 @@
 const express = require('express');
-const date = require(__dirname + '/date.js');
+const mongoose = require('mongoose');
 const app = express();
+// const date = require(__dirname + '/date.js');
 
 app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-const items = ['Eat', 'Play Piano', 'Study'];
-const workItems = [];
 
+//   Mongoose connection and model
+mongoose.connect('mongodb://localhost:27017/dailyplannerDB', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+
+const taskSchema = new mongoose.Schema({
+  title: {
+    type: String,
+    required: true,
+  },
+});
+
+const Task = mongoose.model('Task', taskSchema);
+
+const hi = new Task({
+  title: 'Welcome to your planner',
+});
+const graduate = new Task({
+  title: 'Graduate from Fullstack',
+});
+const switzerland = new Task({
+  title: 'Move to Switzerland permanently',
+});
+
+const defaultTasks = [hi, graduate, switzerland];
+
+Task.insertMany(defaultTasks, (error) => {
+  if (error) console.log(error);
+  else console.log('Successfully saved default tasks');
+});
 
 app.get('/', (req, res, next) => {
-  const today = date.getDate();
 
   res.render('index', {
-    listTitle: today,
+    listTitle: "Home",
     newListItems: items,
   });
 });
