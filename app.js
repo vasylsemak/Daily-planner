@@ -1,7 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const app = express();
-// const date = require(__dirname + "/date.js");
+const date = require(__dirname + "/date.js");
 
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
@@ -14,6 +14,8 @@ mongoose.connect("mongodb://localhost:27017/dailyplannerDB", {
   useUnifiedTopology: true,
 });
 
+
+//   task Schema
 const taskSchema = new mongoose.Schema({
   title: {
     type: String,
@@ -21,6 +23,7 @@ const taskSchema = new mongoose.Schema({
   },
 });
 
+//   task Model
 const Task = mongoose.model("Task", taskSchema);
 
 const hi = new Task({
@@ -36,7 +39,17 @@ const switzerland = new Task({
 const defaultTasks = [hi, graduate, switzerland];
 
 
-//   Routes
+//   list Schema
+const listSchema = new mongoose.Schema({
+  name: String,
+  items: [taskSchema],  //  assosiation One-To_Many
+});
+
+//   list Model
+const List = mongoose.model("List", listSchema);
+
+
+//   GET
 app.get("/", (req, res, next) => {
   Task.find((error, foundTasks) => {
 
@@ -46,20 +59,48 @@ app.get("/", (req, res, next) => {
         else console.log("Successfully saved default tasks");
       });
       res.redirect("/");
-    } else {
-      res.render("index", { listTitle: "Today", newListItems: foundTasks });
+    }
+    else {
+      res.render("index", {
+        listTitle: date.getDate(),
+        taskItems: foundTasks,
+      });
     }
   });
 });
 
+app.get("/:userList", (req, res, next) => {
+  const userList = req.params.userList;
 
+  List.findOne({ name: userList }, (error, foundList) => {
+    if (!error) {
+      if (!foundList) {
+        const list = new List({
+          name: userList,
+          items: defaultTasks,
+        });
+        list.save();
+        res.redirect("/" + userList);
+      }
+      else {
+        res.render("index", {
+          listTitle: foundList.name,
+          taskItems: foundList.items,
+        });
+      }
+    }
+    else console.log(error);
+  });
+});
+
+
+//   POST
 app.post("/", (req, res, next) => {
   const taskTitle = req.body.newItem;
   const newTask = new Task({ title: taskTitle });
   newTask.save();
   res.redirect("/");
 });
-
 
 app.post("/delete", (req, res, next) => {
   const checkedTaskId = req.body.checkbox;
