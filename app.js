@@ -1,7 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const _ = require("lodash");
 const app = express();
-const date = require(__dirname + "/date.js");
 
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
@@ -14,7 +14,7 @@ mongoose.connect("mongodb://localhost:27017/dailyplannerDB", {
   useUnifiedTopology: true,
 });
 
-
+// MODELS  --------------------------------------------------------------------
 //   task Schema
 const taskSchema = new mongoose.Schema({
   title: {
@@ -49,6 +49,8 @@ const listSchema = new mongoose.Schema({
 const List = mongoose.model("List", listSchema);
 
 
+
+//   ROUTES    -------------------------------------------------------------------
 //   GET
 app.get("/", (req, res, next) => {
   Task.find((error, foundTasks) => {
@@ -62,15 +64,16 @@ app.get("/", (req, res, next) => {
     }
     else {
       res.render("index", {
-        listTitle: date.getDate(),
+        listTitle: "Work",
         taskItems: foundTasks,
       });
     }
   });
 });
 
+
 app.get("/:userList", (req, res, next) => {
-  const userList = req.params.userList;
+  const userList = _.capitalize(req.params.userList);
 
   List.findOne({ name: userList }, (error, foundList) => {
     if (!error) {
@@ -97,21 +100,52 @@ app.get("/:userList", (req, res, next) => {
 //   POST
 app.post("/", (req, res, next) => {
   const taskTitle = req.body.newItem;
+  const listName = req.body.buttonItem;
   const newTask = new Task({ title: taskTitle });
-  newTask.save();
-  res.redirect("/");
+
+  if (listName === "Work") {
+    newTask.save();
+    res.redirect("/");
+  }
+  else {
+    List.findOne({ name: listName }, (err, foundList) => {
+      if (!err) {
+        foundList.items.push(newTask);
+        foundList.save();
+        res.redirect("/" + listName);
+      }
+      else console.log("No lis found with tis name", err);
+    });
+  }
 });
 
+
+//   DELETE
 app.post("/delete", (req, res, next) => {
   const checkedTaskId = req.body.checkbox;
+  const listName = req.body.listName;
 
-  Task.deleteOne({ _id: checkedTaskId }, (error) => {
-    if (error) console.log(error);
-    else {
-      console.log("Task has been removed form DB");
-      res.redirect("/");
-    }
-  });
+  if (listName === "Work") {
+    Task.deleteOne({ _id: checkedTaskId }, (error) => {
+      if (error) console.log(error);
+      else {
+        console.log("Task has been removed form DB");
+        res.redirect("/");
+      }
+    });
+  }
+  else {
+    List.findOneAndUpdate(
+      { name: listName },
+      { $pull: { items: { _id: checkedTaskId } } },
+      (err, foundList) => {
+        if (!err) {
+          console.log("Task has been removed form DB");
+          res.redirect("/" + listName);
+        }
+      }
+    );
+  }
 });
 
 
