@@ -14,7 +14,7 @@ mongoose.connect("mongodb://localhost:27017/dailyplannerDB", {
   useUnifiedTopology: true,
 });
 
-
+// MODELS
 //   task Schema
 const taskSchema = new mongoose.Schema({
   title: {
@@ -48,7 +48,7 @@ const listSchema = new mongoose.Schema({
 //   list Model
 const List = mongoose.model("List", listSchema);
 
-
+//   ROUTES
 //   GET
 app.get("/", (req, res, next) => {
   Task.find((error, foundTasks) => {
@@ -62,7 +62,7 @@ app.get("/", (req, res, next) => {
     }
     else {
       res.render("index", {
-        listTitle: date.getDate(),
+        listTitle: "Work",
         taskItems: foundTasks,
       });
     }
@@ -97,9 +97,23 @@ app.get("/:userList", (req, res, next) => {
 //   POST
 app.post("/", (req, res, next) => {
   const taskTitle = req.body.newItem;
+  const listName = req.body.buttonItem;
   const newTask = new Task({ title: taskTitle });
-  newTask.save();
-  res.redirect("/");
+
+  if (listName === "Work") {
+    newTask.save();
+    res.redirect("/");
+  }
+  else {
+    List.findOne({ name: listName }, (err, foundList) => {
+      if (!err) {
+        foundList.items.push(newTask);
+        foundList.save();
+        res.redirect("/" + listName);
+      }
+      else console.log("No lis found with tis name", err);
+    });
+  }
 });
 
 app.post("/delete", (req, res, next) => {
