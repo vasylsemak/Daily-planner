@@ -1,7 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const _ = require("lodash");
 const app = express();
-const date = require(__dirname + "/date.js");
 
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
@@ -14,7 +14,7 @@ mongoose.connect("mongodb://localhost:27017/dailyplannerDB", {
   useUnifiedTopology: true,
 });
 
-// MODELS
+// MODELS  --------------------------------------------------------------------
 //   task Schema
 const taskSchema = new mongoose.Schema({
   title: {
@@ -48,7 +48,9 @@ const listSchema = new mongoose.Schema({
 //   list Model
 const List = mongoose.model("List", listSchema);
 
-//   ROUTES
+
+
+//   ROUTES    -------------------------------------------------------------------
 //   GET
 app.get("/", (req, res, next) => {
   Task.find((error, foundTasks) => {
@@ -69,8 +71,9 @@ app.get("/", (req, res, next) => {
   });
 });
 
+
 app.get("/:userList", (req, res, next) => {
-  const userList = req.params.userList;
+  const userList = _.capitalize(req.params.userList);
 
   List.findOne({ name: userList }, (error, foundList) => {
     if (!error) {
