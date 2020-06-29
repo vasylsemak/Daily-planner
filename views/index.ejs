@@ -11,6 +11,7 @@
       <input type="checkbox" name="checkbox" value="<%=  currTask._id %>" onChange="this.form.submit()">
       <p><%= currTask.title %></p>
     </div>
+    <input type="hidden" name="listName" value="<%= listTitle %>">
   </form>
   <% }); %>
 

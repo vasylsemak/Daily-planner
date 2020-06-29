@@ -116,16 +116,33 @@ app.post("/", (req, res, next) => {
   }
 });
 
+
+//   DELETE
 app.post("/delete", (req, res, next) => {
   const checkedTaskId = req.body.checkbox;
+  const listName = req.body.listName;
 
-  Task.deleteOne({ _id: checkedTaskId }, (error) => {
-    if (error) console.log(error);
-    else {
-      console.log("Task has been removed form DB");
-      res.redirect("/");
-    }
-  });
+  if (listName === "Work") {
+    Task.deleteOne({ _id: checkedTaskId }, (error) => {
+      if (error) console.log(error);
+      else {
+        console.log("Task has been removed form DB");
+        res.redirect("/");
+      }
+    });
+  }
+  else {
+    List.findOneAndUpdate(
+      { name: listName },
+      { $pull: { items: { _id: checkedTaskId } } },
+      (err, foundList) => {
+        if (!err) {
+          console.log("Task has been removed form DB");
+          res.redirect("/" + listName);
+        }
+      }
+    );
+  }
 });
 
 
