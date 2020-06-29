@@ -5,7 +5,7 @@
 </div>
 
 <div class="box">
-  <% newListItems.forEach((currTask) => { %>
+  <% taskItems.forEach((currTask) => { %>
   <form action="/delete" method="post">
     <div class="item">
       <input type="checkbox" name="checkbox" value="<%=  currTask._id %>" onChange="this.form.submit()">
