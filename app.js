@@ -52,7 +52,7 @@ const List = mongoose.model("List", listSchema);
 
 //   ROUTES    -------------------------------------------------------------------
 //   GET
-app.get("/", (req, res, next) => {
+app.get("/", (req, res) => {
   Task.find((error, foundTasks) => {
 
     if (foundTasks.length === 0) {
@@ -72,7 +72,7 @@ app.get("/", (req, res, next) => {
 });
 
 
-app.get("/:userList", (req, res, next) => {
+app.get("/:userList", (req, res) => {
   const userList = _.capitalize(req.params.userList);
 
   List.findOne({ name: userList }, (error, foundList) => {
@@ -98,7 +98,7 @@ app.get("/:userList", (req, res, next) => {
 
 
 //   POST
-app.post("/", (req, res, next) => {
+app.post("/", (req, res) => {
   const taskTitle = req.body.newItem;
   const listName = req.body.buttonItem;
   const newTask = new Task({ title: taskTitle });
@@ -121,7 +121,7 @@ app.post("/", (req, res, next) => {
 
 
 //   DELETE
-app.post("/delete", (req, res, next) => {
+app.post("/delete", (req, res) => {
   const checkedTaskId = req.body.checkbox;
   const listName = req.body.listName;
 
