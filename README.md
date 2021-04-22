@@ -4,9 +4,9 @@
 
 **Built with using the following technologies:**
 - Node.js
-- React
-- Gatsby
-- SASS
+- EJS
+- MongoDB
+- CSS
 
 ## Link:
 https://infinite-garden-86326.herokuapp.com/
