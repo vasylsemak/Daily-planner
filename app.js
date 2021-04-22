@@ -9,34 +9,26 @@ app.use(express.static("public"));
 
 
 //   Mongoose connection and model
-mongoose.connect("mongodb://localhost:27017/dailyplannerDB", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+mongoose.connect(
+  "mongodb+srv://admin-vasyl:test123@cluster0-me3fv.mongodb.net/todolistDB",
+  {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  }
+);
 
 // MODELS  --------------------------------------------------------------------
 //   task Schema
-const taskSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: true,
-  },
-});
+const taskSchema = new mongoose.Schema({ title: String });
 
 //   task Model
 const Task = mongoose.model("Task", taskSchema);
 
-const hi = new Task({
-  title: "Welcome to your planner",
-});
-const graduate = new Task({
-  title: "Graduate from Fullstack",
-});
-const switzerland = new Task({
-  title: "Move to Switzerland permanently",
-});
+const hi = new Task({ title: "Welcome to your planner" });
+const graduate = new Task({ title: "Graduate from Fullstack" });
+const engineer = new Task({ title: "Become successfull software engineer" });
 
-const defaultTasks = [hi, graduate, switzerland];
+const defaultTasks = [hi, graduate, engineer];
 
 
 //   list Schema
@@ -53,7 +45,7 @@ const List = mongoose.model("List", listSchema);
 //   ROUTES  ///////////////////////////////////
 //   GET
 app.get("/", (req, res) => {
-  Task.find((error, foundTasks) => {
+  Task.find({}, (error, foundTasks) => {
 
     if (foundTasks.length === 0) {
       Task.insertMany(defaultTasks, (error) => {
@@ -91,8 +83,7 @@ app.get("/:userList", (req, res) => {
           taskItems: foundList.items,
         });
       }
-    }
-    else console.log(error);
+    } else console.log(error);
   });
 });
 
@@ -126,8 +117,8 @@ app.post("/delete", (req, res) => {
   const listName = req.body.listName;
 
   if (listName === "Work") {
-    Task.deleteOne({ _id: checkedTaskId }, (error) => {
-      if (error) console.log(error);
+    Task.findByIdAndRemove(checkedTaskId, { useFindAndModify: false }, (err) => {
+      if (err) console.log(err);
       else {
         console.log("Task has been removed form DB");
         res.redirect("/");
@@ -138,9 +129,10 @@ app.post("/delete", (req, res) => {
     List.findOneAndUpdate(
       { name: listName },
       { $pull: { items: { _id: checkedTaskId } } },
-      (err, foundList) => {
+      { "useFindAndModify": false },
+      function (err, foundList) {
         if (!err) {
-          console.log("Task has been removed form DB");
+          console.log("Task has been removed from DB");
           res.redirect("/" + listName);
         }
       }
@@ -149,4 +141,7 @@ app.post("/delete", (req, res) => {
 });
 
 
-app.listen(3000, () => console.log("Server is running on port 3000."));
+let port = process.env.PORT;
+if (port === null || port === "") port = 3000;
+
+app.listen(port, () => console.log("Server has started seccussefully."));
