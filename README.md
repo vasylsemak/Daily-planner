@@ -9,3 +9,8 @@
 - MongoDB
 - EJS
 - CSS
+
+<p align="center">
+  <img alt="p1" src="public/css/img/photo-1.png" width="400">
+  <img alt="p2" src="public/css/img/photo-2.png" width="400">
+</p>
